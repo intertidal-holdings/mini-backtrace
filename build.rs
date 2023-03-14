@@ -41,6 +41,8 @@ fn gen_libunwind_bindings() {
         "-ffreestanding".to_string(),
         "-I".to_string(),
         "llvm-libunwind/include".to_string(),
+        "-I".to_string(),
+        "external/riscv64_elf_toolchain/riscv/riscv64-unknown-elf/include/".to_string(),
         "-D_LIBUNWIND_IS_NATIVE_ONLY".to_string(),
     ];
 
@@ -51,18 +53,29 @@ fn gen_libunwind_bindings() {
         .prepend_enum_name(false)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .clang_args(&args)
-        .generate()
+        //.generate()
+        .dump_preprocessed_input()
         .expect("Unable to generate bindings");
 
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-    bindings
-        .write_to_file(out_path.join("bindings.rs"))
-        .expect("Couldn't write bindings!");
+//    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+//    bindings
+//        .write_to_file(out_path.join("bindings.rs"))
+//        .expect("Couldn't write bindings!");
 }
 
 fn main() {
+    let ev = env::vars();
+    println!("ENV variables");
+    for (k,v) in ev.into_iter() {
+        println!("{k}<=>{v}");
+    }
+    println!("ENV variables end");
+
+    println!("+=++=++=++=++=++=++=+=======");
     compile_libunwind();
+    println!("+=++=++=++=++=++=++=+=======");
     gen_libunwind_bindings();
+    println!("+=++=++=++=++=++=++=+=======");
 
     for entry in WalkDir::new("llvm-libunwind")
         .into_iter()
